@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests;
 
-use heapless::{consts::U5, Vec};
+use heapless::Vec;
 
 ///The following are the implemented ANSI escape sequences. More to be added.
 #[derive(Debug, PartialEq, Clone)]
@@ -16,7 +16,7 @@ pub enum AnsiSequence {
     CursorRestore,
     EraseDisplay,
     EraseLine,
-    SetGraphicsMode(Vec<u8, U5>),
+    SetGraphicsMode(Vec<u8, 5>),
     SetMode(u8),
     ResetMode(u8),
     HideCursor,
