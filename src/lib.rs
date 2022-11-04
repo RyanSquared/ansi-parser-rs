@@ -19,5 +19,5 @@ mod traits;
 /// turns all of the ANSI sequences into enums and splits the string at every location that there
 /// was an ANSI Sequence.
 pub use enums::*;
-pub use parsers::parse_escape;
+pub use parsers::{parse_escape, Vec};
 pub use traits::*;

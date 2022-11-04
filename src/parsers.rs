@@ -3,12 +3,12 @@ mod tests;
 
 use crate::AnsiSequence;
 
-use core::convert::TryInto;
-use heapless::Vec;
+pub use heapless::Vec;
 use nom::{bytes::streaming::tag, *};
 
 use std::convert::TryFrom;
 
+/*
 macro_rules! expr_res {
     ($i:expr, $e:expr) => {{
         match $e {
@@ -22,6 +22,7 @@ macro_rules! expr_res {
         }
     }};
 }
+*/
 
 fn err_hack(i: &str) -> nom::Err<(&str, nom::error::ErrorKind)> {
     nom::Err::Error((i, nom::error::ErrorKind::Fix))
@@ -54,13 +55,16 @@ fn semicolon(i: &str) -> IResult<&str, &str> {
     tag(";")(i)
 }
 
-fn parse_int_(i: &str) -> IResult<&str, u32> {
+/*
+fn parse_int(i: &str) -> IResult<&str, u32> {
     nom::combinator::map_res(nom::character::streaming::digit0, |s: &str| {
         s.parse::<u32>()
     })(i)
 }
+*/
 
 // so, technically, this can match any FromStr, but since we match digit0, it has to be an int
+// this removes the need to use .into() and bubble up types
 fn parse_int<T: std::str::FromStr>() -> Box<dyn Fn(&str) -> IResult<&str, T>> {
     Box::new(|i| {
         nom::combinator::map_res(nom::character::streaming::digit0, |s: &str| s.parse::<T>())(i)
