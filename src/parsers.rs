@@ -24,8 +24,8 @@ macro_rules! expr_res {
 }
 */
 
-fn err_hack(i: &str) -> nom::Err<(&str, nom::error::ErrorKind)> {
-    nom::Err::Error((i, nom::error::ErrorKind::Fix))
+fn err_hack(i: &str) -> nom::Err<nom::error::Error<&str>> {
+    nom::Err::Error(nom::error::Error::<&str>{ input: i, code: nom::error::ErrorKind::Fix })
 }
 
 // Previous macro body
@@ -580,12 +580,7 @@ named!(
 );
 */
 
-static PARSERS: [for<'r> fn(
-    &'r str,
-) -> Result<
-    (&'r str, AnsiSequence),
-    nom::Err<(&'r str, nom::error::ErrorKind)>,
->; 49] = [
+static PARSERS: [for<'r> fn(&'r str) -> Result<(&'r str, AnsiSequence), nom::Err<nom::error::Error<&'r str>>>; 49] = [
     escape,
     cursor_pos,
     cursor_up,
