@@ -1,11 +1,11 @@
 [package]
-authors = ["David Bittner <bittneradave@gmail.com>"]
+authors = ["Ryan Heywood <me@ryansquared.pub>"]
 description = "A library using nom for parsing ANSI Escape Codes"
-homepage = "https://gitlab.com/DavidBittner/ansi-parser"
+homepage = "https://github.com/RyanSquared/ansi-parser-rs"
 name = "ansi-parser"
 
 license = "MPL-2.0"
-version = "0.9.0"
+version = "0.9.1"
 
 edition = "2018"
 
