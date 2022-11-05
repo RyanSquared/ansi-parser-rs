@@ -4,9 +4,9 @@ mod tests;
 use crate::AnsiSequence;
 
 pub use heapless::Vec;
-use nom::{bytes::streaming::tag, *};
+use nom::{bytes::streaming::tag, error::{Error, ErrorKind}, IResult};
 
-use std::convert::TryFrom;
+use core::convert::TryFrom;
 
 /*
 macro_rules! expr_res {
@@ -24,8 +24,8 @@ macro_rules! expr_res {
 }
 */
 
-fn err_hack(i: &str) -> nom::Err<nom::error::Error<&str>> {
-    nom::Err::Error(nom::error::Error::<&str>{ input: i, code: nom::error::ErrorKind::Fix })
+fn err_hack(i: &str) -> nom::Err<Error<&str>> {
+    nom::Err::Error(Error::<&str>{ input: i, code: ErrorKind::Fix })
 }
 
 // Previous macro body
@@ -66,10 +66,10 @@ fn parse_int(i: &str) -> IResult<&str, u32> {
 
 // so, technically, this can match any FromStr, but since we match digit0, it has to be an int
 // this removes the need to use .into() and bubble up types
-fn parse_int<T: std::str::FromStr>() -> Box<dyn Fn(&str) -> IResult<&str, T>> {
-    Box::new(|i| {
+fn parse_int<T: core::str::FromStr>() -> impl Fn(&str) -> IResult<&str, T> {
+    |i| {
         nom::combinator::map_res(nom::character::streaming::digit0, |s: &str| s.parse::<T>())(i)
-    })
+    }
 }
 
 /*
@@ -581,7 +581,7 @@ named!(
 );
 */
 
-static PARSERS: [for<'r> fn(&'r str) -> Result<(&'r str, AnsiSequence), nom::Err<nom::error::Error<&'r str>>>; 49] = [
+static PARSERS: [for<'r> fn(&'r str) -> Result<(&'r str, AnsiSequence), nom::Err<Error<&'r str>>>; 49] = [
     escape,
     cursor_pos,
     cursor_up,
