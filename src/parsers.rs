@@ -38,6 +38,7 @@ named!(
     )
 );
 */
+
 macro_rules! tag_parser {
     ($sig:ident, $tag:expr, $ret:expr) => {
         fn $sig(i: &str) -> IResult<&str, AnsiSequence> {
@@ -633,10 +634,8 @@ static PARSERS: [for<'r> fn(&'r str) -> Result<(&'r str, AnsiSequence), nom::Err
 ];
 
 fn combined(i: &str) -> IResult<&str, AnsiSequence> {
-    // TODO: This function likely causes a massive amount of work. It should be optimized to
-    // prematurely scan for the first ansi alphabetic u8 and match which pattern to use based on
-    // that. This can be done by getting the byte code for the char and subtracting `A` to get
-    // an index in a static array.
+    // Note: This seems like it's poorly optimized but it actually runs pretty quickly compared to
+    // attempts at making optimized versions
     for item in &PARSERS {
         if let Ok(result) = item(i) {
             return Ok(result);
