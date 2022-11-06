@@ -16,7 +16,7 @@ pub enum AnsiSequence {
     CursorRestore,
     EraseDisplay,
     EraseLine,
-    SetGraphicsMode(Vec<u8, 5>),
+    SetGraphicsMode(Vec<u8, 16>),
     SetMode(u8),
     ResetMode(u8),
     HideCursor,

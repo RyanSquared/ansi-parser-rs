@@ -6,8 +6,6 @@ use crate::AnsiSequence;
 pub use heapless::Vec;
 use nom::{bytes::streaming::tag, error::{Error, ErrorKind}, IResult};
 
-use core::convert::TryFrom;
-
 /*
 macro_rules! expr_res {
     ($i:expr, $e:expr) => {{
@@ -215,11 +213,13 @@ named!(
 );
 */
 
+/*
 fn graphics_mode1(i: &str) -> IResult<&str, AnsiSequence> {
     let (i, (_, val, _)) = nom::sequence::tuple((bracket, parse_int::<u8>(), tag("m")))(i)?;
     let v = Vec::from_slice(&[val]).map_err(|_| err_hack(i))?;
     Ok((i, AnsiSequence::SetGraphicsMode(v)))
 }
+*/
 
 /*
 named!(
@@ -241,6 +241,7 @@ named!(
 );
 */
 
+/*
 fn graphics_mode2(i: &str) -> IResult<&str, AnsiSequence> {
     let (i, (_, val1, _, val2, _)) = nom::sequence::tuple((
         bracket,
@@ -254,6 +255,7 @@ fn graphics_mode2(i: &str) -> IResult<&str, AnsiSequence> {
     let v = Vec::from_slice(&[val1, val2]).map_err(|_| err_hack(i))?;
     Ok((i, AnsiSequence::SetGraphicsMode(v)))
 }
+*/
 
 /*
 named!(
@@ -279,6 +281,7 @@ named!(
 );
 */
 
+/*
 fn graphics_mode3(i: &str) -> IResult<&str, AnsiSequence> {
     let (i, (_, val1, _, val2, _, val3, _)) = nom::sequence::tuple((
         bracket,
@@ -295,6 +298,7 @@ fn graphics_mode3(i: &str) -> IResult<&str, AnsiSequence> {
     let v = Vec::from_slice(&[val1, val2, val3]).map_err(|_| err_hack(i))?;
     Ok((i, AnsiSequence::SetGraphicsMode(v)))
 }
+*/
 
 /*
 named!(
@@ -306,6 +310,7 @@ named!(
 );
 */
 
+/*
 // Previous versions of this function (see above) discarded all values because there is currently
 // no valid use for them. However, actually including the data -- which can be useful, eventually
 // doesn't break tests so this should be fine.
@@ -328,6 +333,7 @@ fn graphics_mode4(i: &str) -> IResult<&str, AnsiSequence> {
     let v = Vec::from_slice(&[val1, val2, val3, val4]).map_err(|_| err_hack(i))?;
     Ok((i, AnsiSequence::SetGraphicsMode(v)))
 }
+*/
 
 /*
 named!(
@@ -361,6 +367,7 @@ named!(
 );
 */
 
+/*
 fn graphics_mode5(i: &str) -> IResult<&str, AnsiSequence> {
     let (i, (_, val1, _, val2, _, val3, _, val4, _, val5, _)) = nom::sequence::tuple((
         bracket,
@@ -383,6 +390,7 @@ fn graphics_mode5(i: &str) -> IResult<&str, AnsiSequence> {
     let v = Vec::from_slice(&[val1, val2, val3, val4, val5]).map_err(|_| err_hack(i))?;
     Ok((i, AnsiSequence::SetGraphicsMode(v)))
 }
+*/
 
 /*
 named!(
@@ -397,14 +405,34 @@ named!(
 );
 */
 
-fn graphics_mode(i: &str) -> IResult<&str, AnsiSequence> {
-    nom::branch::alt((
-        graphics_mode1,
-        graphics_mode2,
-        graphics_mode3,
-        graphics_mode4,
-        graphics_mode5,
-    ))(i)
+fn graphics_mode(input_: &str) -> IResult<&str, AnsiSequence> {
+    let mut input = &input_[..];
+    (input, _) = bracket(input)?;
+    let mut v = Vec::<u8, 16>::new();
+    for _ in 1..=16 {
+        // set this to false if a number is found but a semicolon isn't matched
+        let should_continue: bool;
+        (input, should_continue) = match parse_int::<u8>()(input) {
+            // TODO: non existent values should be marked to 0
+            // this happens rarely enough in practice that it's not worth fixing
+            // no match, return
+            //
+            // Note: This breaks here and does *not* progress `input`
+            Err(_) => break,
+            Ok((input, val)) => {
+                v.push(val).expect("1..=16 loop overflowed");
+                match semicolon(input) {
+                    Err(_) => (input, false),
+                    Ok((input, _)) => (input, true)
+                }
+            }
+        };
+        if !should_continue {
+            break
+        }
+    };
+    (input, _) = tag("m")(input)?;
+    Ok((input, AnsiSequence::SetGraphicsMode(v)))
 }
 
 /*
