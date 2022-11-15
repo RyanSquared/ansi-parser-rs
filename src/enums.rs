@@ -4,7 +4,7 @@ mod tests;
 use heapless::Vec;
 
 ///The following are the implemented ANSI escape sequences. More to be added.
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum AnsiSequence {
     Escape,
     CursorPos(u32, u32),
@@ -131,7 +131,7 @@ impl Display for AnsiSequence {
 ///This is what is outputted by the parsing iterator.
 ///Each block contains either straight-up text, or simply
 ///an ANSI escape sequence.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Output<'a> {
     TextBlock(&'a str),
     Escape(AnsiSequence),

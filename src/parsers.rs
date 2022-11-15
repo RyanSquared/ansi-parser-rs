@@ -406,7 +406,7 @@ named!(
 */
 
 fn graphics_mode(input_: &str) -> IResult<&str, AnsiSequence> {
-    let mut input = &input_[..];
+    let mut input = input_;
     (input, _) = bracket(input)?;
     let mut v = Vec::<u8, 16>::new();
     for _ in 1..=16 {
@@ -609,7 +609,9 @@ named!(
 );
 */
 
-static PARSERS: [for<'r> fn(&'r str) -> Result<(&'r str, AnsiSequence), nom::Err<Error<&'r str>>>; 49] = [
+type Parser = fn(&str) -> Result<(&str, AnsiSequence), nom::Err<Error<&str>>>;
+
+static PARSERS: [Parser; 49] = [
     escape,
     cursor_pos,
     cursor_up,
