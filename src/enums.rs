@@ -60,16 +60,18 @@ pub enum AnsiSequence {
 use core::fmt::{Display, Formatter, Result as DisplayResult};
 impl Display for AnsiSequence {
     fn fmt(&self, formatter: &mut Formatter) -> DisplayResult {
+        #[allow(clippy::enum_glob_use)]
+        use AnsiSequence::*;
+
         write!(formatter, "\u{1b}")?;
 
-        use AnsiSequence::*;
         match self {
             Escape => write!(formatter, "\u{1b}"),
-            CursorPos(line, col) => write!(formatter, "[{};{}H", line, col),
-            CursorUp(amt) => write!(formatter, "[{}A", amt),
-            CursorDown(amt) => write!(formatter, "[{}B", amt),
-            CursorForward(amt) => write!(formatter, "[{}C", amt),
-            CursorBackward(amt) => write!(formatter, "[{}D", amt),
+            CursorPos(line, col) => write!(formatter, "[{line};{col}H"),
+            CursorUp(amt) => write!(formatter, "[{amt}A"),
+            CursorDown(amt) => write!(formatter, "[{amt}B"),
+            CursorForward(amt) => write!(formatter, "[{amt}C"),
+            CursorBackward(amt) => write!(formatter, "[{amt}D"),
             CursorSave => write!(formatter, "[s"),
             CursorRestore => write!(formatter, "[u"),
             EraseDisplay => write!(formatter, "[2J"),
@@ -86,8 +88,8 @@ impl Display for AnsiSequence {
                 ),
                 _ => unreachable!(),
             },
-            SetMode(mode) => write!(formatter, "[={}h", mode),
-            ResetMode(mode) => write!(formatter, "[={}l", mode),
+            SetMode(mode) => write!(formatter, "[={mode}h"),
+            ResetMode(mode) => write!(formatter, "[={mode}l"),
             ShowCursor => write!(formatter, "[?25h"),
             HideCursor => write!(formatter, "[?25l"),
             CursorToApp => write!(formatter, "[?1h"),
@@ -123,7 +125,7 @@ impl Display for AnsiSequence {
             SetG1AltAndSpecialGraph => write!(formatter, ")2"),
             SetSingleShift2 => write!(formatter, "N"),
             SetSingleShift3 => write!(formatter, "O"),
-            SetTopAndBottom(x, y) => write!(formatter, "{};{}r", x, y),
+            SetTopAndBottom(x, y) => write!(formatter, "{x};{y}r"),
         }
     }
 }
@@ -139,10 +141,10 @@ pub enum Output<'a> {
 
 impl<'a> Display for Output<'a> {
     fn fmt(&self, formatter: &mut Formatter) -> DisplayResult {
-        use Output::*;
+        use Output::{Escape, TextBlock};
         match self {
-            TextBlock(txt) => write!(formatter, "{}", txt),
-            Escape(seq) => write!(formatter, "{}", seq),
+            Escape(seq) => write!(formatter, "{seq}"),
+            TextBlock(txt) => write!(formatter, "{txt}"),
         }
     }
 }

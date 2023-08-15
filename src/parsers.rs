@@ -4,7 +4,11 @@ mod tests;
 use crate::AnsiSequence;
 
 pub use heapless::Vec;
-use nom::{bytes::streaming::tag, error::{Error, ErrorKind}, IResult};
+use nom::{
+    bytes::streaming::tag,
+    error::{Error, ErrorKind},
+    IResult,
+};
 
 /*
 macro_rules! expr_res {
@@ -23,7 +27,10 @@ macro_rules! expr_res {
 */
 
 fn err_hack(i: &str) -> nom::Err<Error<&str>> {
-    nom::Err::Error(Error::<&str>{ input: i, code: ErrorKind::Fix })
+    nom::Err::Error(Error::<&str> {
+        input: i,
+        code: ErrorKind::Fix,
+    })
 }
 
 // Previous macro body
@@ -65,9 +72,7 @@ fn parse_int(i: &str) -> IResult<&str, u32> {
 // so, technically, this can match any FromStr, but since we match digit0, it has to be an int
 // this removes the need to use .into() and bubble up types
 fn parse_int<T: core::str::FromStr>() -> impl Fn(&str) -> IResult<&str, T> {
-    |i| {
-        nom::combinator::map_res(nom::character::streaming::digit0, |s: &str| s.parse::<T>())(i)
-    }
+    |i| nom::combinator::map_res(nom::character::streaming::digit0, str::parse)(i)
 }
 
 /*
@@ -423,14 +428,14 @@ fn graphics_mode(input_: &str) -> IResult<&str, AnsiSequence> {
                 v.push(val).expect("1..=16 loop overflowed");
                 match semicolon(input) {
                     Err(_) => (input, false),
-                    Ok((input, _)) => (input, true)
+                    Ok((input, _)) => (input, true),
                 }
             }
         };
         if !should_continue {
-            break
+            break;
         }
-    };
+    }
     (input, _) = tag("m")(input)?;
     Ok((input, AnsiSequence::SetGraphicsMode(v)))
 }
@@ -685,6 +690,11 @@ named!(
 );
 */
 
+/// Parse a string containing ANSI escape codes into an [`AnsiSequence`].
+///
+/// # Errors
+///
+/// Will return `Err` if given `i` input can't be parsed into an [`AnsiSequence`].
 pub fn parse_escape(i: &str) -> IResult<&str, AnsiSequence> {
     nom::sequence::preceded(tag("\u{1b}"), combined)(i)
 }
